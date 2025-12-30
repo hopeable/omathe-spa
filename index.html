@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oma The Spa | Luxury Wellness & Pilates Victoria Island</title>
-    <meta name="description" content="A sanctuary where movement meets stillness. Discover signature spa rituals, world-class Reformer Pilates, and artisanal dining in the heart of Lagos.">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,13 +13,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     
-    <!-- React & Babel for Single File Execution -->
+    <!-- React & Babel (Single File Engine) -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <style>
-        /* Essential styles to prevent the "white blink" and set the luxury theme */
         :root {
             --beige: #F9F7F2;
             --charcoal: #2D2A26;
@@ -33,42 +31,46 @@
             background-color: var(--beige) !important;
             color: var(--charcoal);
             font-family: 'Inter', sans-serif;
-            scroll-behavior: smooth;
-            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        .font-serif { font-family: 'Cormorant+Garamond', serif; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--beige); }
-        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
-
-        #root { min-height: 100vh; }
-
-        .fade-in { animation: fadeIn 1s ease-out forwards; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* PRE-LOADER STYLING */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: var(--beige);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease-out;
         }
+        
+        .loader-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .font-serif { font-family: 'Cormorant Garamond', serif; }
+        #root { opacity: 0; transition: opacity 1s ease-in; }
+        #root.visible { opacity: 1; }
     </style>
 
     <script>
-        // Configure Tailwind with the luxury theme
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        oma: {
-                            beige: '#F9F7F2',
-                            charcoal: '#2D2A26',
-                            gold: '#C9A97C',
-                            border: '#E5E1D8'
-                        }
-                    },
-                    fontFamily: {
-                        serif: ['Cormorant Garamond', 'serif'],
-                        sans: ['Inter', 'sans-serif'],
+                        oma: { beige: '#F9F7F2', charcoal: '#2D2A26', gold: '#C9A97C', border: '#E5E1D8' }
                     }
                 }
             }
@@ -76,152 +78,110 @@
     </script>
 </head>
 <body>
+    <!-- Pre-loader: Shows while React/Babel is initializing -->
+    <div id="preloader">
+        <div class="loader-logo">Oma</div>
+        <div class="text-[10px] uppercase tracking-[0.5em] mt-4 opacity-50">The Spa</div>
+    </div>
+
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Custom SVG Icons to avoid external dependency issues
+        // Custom SVGs for a zero-failure experience
         const Icons = {
-            Waves: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>,
-            Dumbbell: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 10v4"/><path d="M21 10v4"/><path d="M6.5 5v14"/><path d="M17.5 5v14"/></svg>,
-            Sparkles: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>,
-            Utensils: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>,
-            X: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
-            Menu: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>,
-            MapPin: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
-            Phone: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Waves: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 6c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>,
+            Dumbbell: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6.5 6.5h11M6.5 17.5h11M3 10v4M21 10v4M6.5 5v14M17.5 5v14"/></svg>,
+            Sparkles: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>,
+            Utensils: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>,
+            Menu: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>,
+            X: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
         };
 
         const App = () => {
-            const [isMenuOpen, setIsMenuOpen] = useState(false);
             const [scrolled, setScrolled] = useState(false);
             const [activeTab, setActiveTab] = useState('spa');
-            const [formStatus, setFormStatus] = useState('idle');
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
 
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 50);
                 window.addEventListener('scroll', handleScroll);
+                
+                // Hide pre-loader once React has finished rendering
+                setTimeout(() => {
+                    document.getElementById('preloader').style.opacity = '0';
+                    document.getElementById('root').classList.add('visible');
+                    setTimeout(() => {
+                        document.getElementById('preloader').style.display = 'none';
+                    }, 800);
+                }, 1500);
+
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
-            const scrollToSection = (e, id) => {
-                e.preventDefault();
-                const idMap = {
-                    'spa': 'spa-section',
-                    'pilates': 'pilates-section',
-                    'nails': 'spa-section',
-                    'dining': 'spa-section',
-                    'contact': 'contact-section',
-                    'home': 'home-section'
-                };
-
-                const targetId = idMap[id.toLowerCase()] || id.toLowerCase();
-                const element = document.getElementById(targetId);
-                
-                if (element) {
-                    if (id.toLowerCase() === 'dining') setActiveTab('dining');
-                    if (id.toLowerCase() === 'nails') setActiveTab('beauty');
-                    if (id.toLowerCase() === 'spa') setActiveTab('spa');
-
-                    const offset = scrolled ? 80 : 100;
-                    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-                    const offsetPosition = elementPosition - offset;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }
-                setIsMenuOpen(false);
-            };
-
-            const categories = [
-                { id: 'spa', name: 'Spa Services', icon: <Icons.Waves /> },
-                { id: 'movement', name: 'Pilates', icon: <Icons.Dumbbell /> },
-                { id: 'beauty', name: 'Nail & Lash', icon: <Icons.Sparkles /> },
-                { id: 'dining', name: 'Dining', icon: <Icons.Utensils /> }
-            ];
-
             const serviceContent = {
                 spa: [
-                    { title: 'Holistic Swedish', duration: '60/90 min', desc: 'A tailored full body massage designed to eliminate toxins and restore peace.', img: 'https://images.unsplash.com/photo-1544161515-4af6b1d8e1a9?auto=format&fit=crop&q=80&w=800' },
-                    { title: 'Aroma Bliss', duration: '60/90 min', desc: 'Combines the power of therapeutic essential oils with specialized techniques.', img: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&q=80&w=800' },
-                    { title: 'Deep Tissue', duration: '60/90 min', desc: 'Intense therapeutic pressure to ease back knots and supercharge relief.', img: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&q=80&w=800' }
+                    { title: 'Holistic Swedish', dur: '60/90 min', img: 'https://images.unsplash.com/photo-1544161515-4af6b1d8e1a9?w=800' },
+                    { title: 'Aroma Bliss', dur: '60/90 min', img: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800' },
+                    { title: 'Deep Tissue', dur: '60/90 min', img: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=800' }
                 ],
                 movement: [
-                    { title: 'Reformer Pilates', duration: '55 min', desc: 'Strengthen your core through controlled, resistance-based movement.', img: 'https://images.unsplash.com/photo-1518611012118-29a8d63ee0c2?auto=format&fit=crop&q=80&w=800' },
-                    { title: '1-on-1 Training', duration: '60 min', desc: 'Private sessions tailored to your specific fitness and postural goals.', img: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=800' }
+                    { title: 'Reformer Pilates', dur: '55 min', img: 'https://images.unsplash.com/photo-1518611012118-29a8d63ee0c2?w=800' },
+                    { title: '1-on-1 Training', dur: '60 min', img: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800' }
                 ],
                 beauty: [
-                    { title: 'Signature Manicure', duration: '45 min', desc: 'Includes prep, cuticle care, signature gel polish, and luxury scrub.', img: 'https://images.unsplash.com/photo-1604654894610-df4906687ec0?auto=format&fit=crop&q=80&w=800' },
-                    { title: 'Lash Extensions', duration: '90 min', desc: 'Premium lash applications for a naturally enhanced or dramatic look.', img: 'https://images.unsplash.com/photo-1583001931096-959e9a1a6223?auto=format&fit=crop&q=80&w=800' }
+                    { title: 'Signature Mani', dur: '45 min', img: 'https://images.unsplash.com/photo-1604654894610-df4906687ec0?w=800' },
+                    { title: 'Lash Extensions', dur: '90 min', img: 'https://images.unsplash.com/photo-1583001931096-959e9a1a6223?w=800' }
                 ],
                 dining: [
-                    { title: "Amelia's Restaurant", duration: 'Lunch/Dinner', desc: 'Curated, health-conscious gourmet dishes served in a peaceful setting.', img: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&q=80&w=800' }
+                    { title: "Amelia's Kitchen", dur: 'All Day', img: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800' }
                 ]
             };
 
             return (
                 <div className="min-h-screen">
-                    {/* Navigation */}
-                    <nav className={`fixed w-full z-50 transition-all duration-700 ${scrolled ? 'bg-white/95 backdrop-blur-md py-3 shadow-md border-b border-oma-border' : 'bg-transparent py-8'}`}>
+                    <nav className={`fixed w-full z-50 transition-all duration-700 ${scrolled ? 'bg-white/95 backdrop-blur-md py-3 shadow-md' : 'bg-transparent py-8'}`}>
                         <div className="container mx-auto px-6 flex justify-between items-center">
-                            <div className="flex flex-col leading-none cursor-pointer" onClick={(e) => scrollToSection(e, 'home')}>
-                                <span className="text-2xl font-serif tracking-[0.2em] uppercase">Oma</span>
+                            <div className="flex flex-col leading-none">
+                                <span className="text-2xl font-serif tracking-widest uppercase">Oma</span>
                                 <span className="text-[10px] tracking-[0.4em] uppercase opacity-70">The Spa</span>
                             </div>
-
                             <div className="hidden lg:flex items-center gap-10">
-                                {['Spa', 'Pilates', 'Nails', 'Dining', 'Contact'].map((item) => (
-                                    <a key={item} href={`#${item.toLowerCase()}`} onClick={(e) => scrollToSection(e, item.toLowerCase())}
-                                        className="text-[11px] uppercase tracking-[0.2em] font-medium hover:text-oma-gold transition-colors">
-                                        {item}
-                                    </a>
+                                {['Spa', 'Pilates', 'Dining', 'Contact'].map(item => (
+                                    <a key={item} href="#" className="text-[11px] uppercase tracking-widest hover:text-oma-gold transition-colors">{item}</a>
                                 ))}
-                                <button className="bg-oma-charcoal text-white px-8 py-2.5 rounded-full text-[10px] uppercase tracking-widest hover:bg-oma-gold transition-all duration-500 shadow-lg">
-                                    Book Appointment
-                                </button>
+                                <button className="bg-oma-charcoal text-white px-8 py-2.5 rounded-full text-[10px] uppercase tracking-widest hover:bg-oma-gold transition-all">Book Now</button>
                             </div>
-
-                            <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                                {isMenuOpen ? <Icons.X /> : <Icons.Menu />}
-                            </button>
+                            <button className="lg:hidden" onClick={() => setIsMenuOpen(true)}><Icons.Menu /></button>
                         </div>
                     </nav>
 
-                    {/* Hero Section */}
-                    <section id="home-section" className="relative h-screen flex items-center justify-center overflow-hidden">
+                    <section className="relative h-screen flex items-center justify-center">
                         <div className="absolute inset-0">
-                            <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=2000" 
-                                className="w-full h-full object-cover brightness-[0.75]" alt="Hero" />
-                            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-oma-beige"></div>
+                            <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=2000" className="w-full h-full object-cover brightness-[0.7]" alt="Hero" />
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-oma-beige"></div>
                         </div>
-                        <div className="relative z-10 text-center px-6 fade-in">
-                            <h1 className="text-5xl md:text-8xl font-serif text-white mb-8 leading-[1.1]">
-                                Holistic <span className="italic font-light">Elegance</span>
-                            </h1>
-                            <p className="text-white/80 max-w-lg mx-auto mb-10 text-sm md:text-base tracking-wide leading-relaxed font-light">
-                                A sanctuary where movement meets stillness. Rejuvenate your mind, body, and soul in the heart of Lagos.
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-5 justify-center">
-                                <button onClick={(e) => scrollToSection(e, 'spa')}
-                                    className="bg-white text-oma-charcoal px-10 py-4 rounded-full text-[11px] uppercase tracking-[0.2em] hover:bg-oma-charcoal hover:text-white transition-all shadow-2xl">
-                                    Explore Menu
-                                </button>
-                            </div>
+                        <div className="relative z-10 text-center text-white px-6">
+                            <h1 className="text-6xl md:text-9xl font-serif mb-6 leading-none">Holistic <br/><span className="italic font-light">Elegance</span></h1>
+                            <p className="max-w-md mx-auto opacity-80 text-sm tracking-wide mb-10">A sanctuary where movement meets stillness in the heart of Victoria Island.</p>
+                            <button className="bg-white text-oma-charcoal px-12 py-4 rounded-full text-[11px] uppercase tracking-[0.2em] hover:bg-oma-charcoal hover:text-white transition-all shadow-2xl">Explore Menu</button>
                         </div>
                     </section>
 
-                    {/* Services Section */}
-                    <section id="spa-section" className="py-24 px-6 bg-oma-beige">
+                    <section className="py-24 px-6 bg-oma-beige">
                         <div className="container mx-auto">
-                            <div className="text-center max-w-2xl mx-auto mb-16">
-                                <h2 className="text-4xl md:text-5xl font-serif mb-6">Signature Rituals</h2>
-                                <div className="flex flex-wrap justify-center gap-3 mt-8">
-                                    {categories.map((cat) => (
+                            <div className="text-center mb-16">
+                                <h2 className="text-4xl md:text-6xl font-serif mb-8">The Experience</h2>
+                                <div className="flex flex-wrap justify-center gap-3">
+                                    {[
+                                        { id: 'spa', name: 'Spa', icon: <Icons.Waves /> },
+                                        { id: 'movement', name: 'Pilates', icon: <Icons.Dumbbell /> },
+                                        { id: 'beauty', name: 'Aesthetics', icon: <Icons.Sparkles /> },
+                                        { id: 'dining', name: 'Dining', icon: <Icons.Utensils /> }
+                                    ].map(cat => (
                                         <button key={cat.id} onClick={() => setActiveTab(cat.id)}
-                                            className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-[9px] uppercase tracking-widest transition-all ${
+                                            className={`flex items-center gap-2 px-8 py-3 rounded-full text-[10px] uppercase tracking-widest transition-all ${
                                                 activeTab === cat.id ? 'bg-oma-charcoal text-white shadow-xl' : 'bg-white border border-oma-border'
                                             }`}>
                                             {cat.icon} {cat.name}
@@ -229,17 +189,16 @@
                                     ))}
                                 </div>
                             </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {serviceContent[activeTab].map((service, index) => (
-                                    <div key={index} className="group bg-white rounded-[40px] border border-oma-border overflow-hidden hover:shadow-2xl transition-all duration-700 flex flex-col">
-                                        <div className="h-52 overflow-hidden">
-                                            <img src={service.img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                {serviceContent[activeTab].map((s, i) => (
+                                    <div key={i} className="group bg-white rounded-[40px] overflow-hidden border border-oma-border hover:shadow-2xl transition-all duration-700">
+                                        <div className="h-56 overflow-hidden">
+                                            <img src={s.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={s.title} />
                                         </div>
-                                        <div className="p-8 flex flex-col flex-grow">
-                                            <span className="text-[10px] text-oma-gold font-bold uppercase tracking-widest">{service.duration}</span>
-                                            <h3 className="text-2xl font-serif mt-2 mb-4">{service.title}</h3>
-                                            <p className="text-oma-charcoal/70 font-light text-sm leading-relaxed">{service.desc}</p>
+                                        <div className="p-8">
+                                            <span className="text-[10px] text-oma-gold font-bold uppercase tracking-widest">{s.dur}</span>
+                                            <h3 className="text-2xl font-serif mt-2 mb-4">{s.title}</h3>
+                                            <button className="text-[10px] uppercase tracking-widest font-bold border-b border-oma-border pb-1 hover:border-oma-gold transition-colors">Book Now</button>
                                         </div>
                                     </div>
                                 ))}
@@ -247,41 +206,16 @@
                         </div>
                     </section>
 
-                    {/* Contact Section */}
-                    <section id="contact-section" className="py-24 px-6 bg-white">
-                        <div className="container mx-auto text-center">
-                            <h2 className="text-4xl font-serif mb-12">Visit Our Sanctuary</h2>
-                            <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
-                                <div className="flex items-center gap-5 p-8 bg-oma-beige rounded-[30px]">
-                                    <div className="p-4 bg-white rounded-full text-oma-gold"><Icons.MapPin /></div>
-                                    <div className="text-left">
-                                        <h4 className="text-[10px] font-bold uppercase tracking-widest mb-1">Location</h4>
-                                        <p className="text-sm">14a Adeola Hopewell, Victoria Island, Lagos</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-5 p-8 bg-oma-beige rounded-[30px]">
-                                    <div className="p-4 bg-white rounded-full text-oma-gold"><Icons.Phone /></div>
-                                    <div className="text-left">
-                                        <h4 className="text-[10px] font-bold uppercase tracking-widest mb-1">Contact</h4>
-                                        <p className="text-sm">+234 907 830 4040</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <footer className="py-12 bg-oma-beige border-t border-oma-border text-center">
-                         <span className="text-xl font-serif tracking-[0.2em] uppercase">Oma</span>
-                         <p className="text-[9px] uppercase tracking-widest opacity-50 mt-4">© 2024 Oma The Spa. Lagos, Nigeria.</p>
+                    <footer className="py-12 bg-oma-beige text-center border-t border-oma-border">
+                        <span className="text-2xl font-serif tracking-widest uppercase">Oma</span>
+                        <p className="text-[9px] uppercase tracking-[0.4em] opacity-40 mt-4">14a Adeola Hopewell, Victoria Island, Lagos</p>
                     </footer>
 
-                    {/* Mobile Menu */}
                     {isMenuOpen && (
-                        <div className="fixed inset-0 z-[100] bg-oma-beige flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-300">
+                        <div className="fixed inset-0 z-[100] bg-oma-beige flex flex-col items-center justify-center space-y-8">
                             <button className="absolute top-8 right-6" onClick={() => setIsMenuOpen(false)}><Icons.X /></button>
-                            {['Spa', 'Pilates', 'Nails', 'Dining', 'Contact'].map((item) => (
-                                <a key={item} href={`#${item.toLowerCase()}`} onClick={(e) => scrollToSection(e, item.toLowerCase())}
-                                    className="text-4xl font-serif hover:text-oma-gold transition-colors">{item}</a>
+                            {['Spa', 'Pilates', 'Dining', 'Contact'].map(item => (
+                                <a key={item} href="#" className="text-5xl font-serif hover:text-oma-gold transition-colors">{item}</a>
                             ))}
                         </div>
                     )}
