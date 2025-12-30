@@ -32,6 +32,7 @@
             color: var(--charcoal);
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
         /* PRE-LOADER STYLING */
@@ -63,6 +64,20 @@
         .font-serif { font-family: 'Cormorant Garamond', serif; }
         #root { opacity: 0; transition: opacity 1s ease-in; }
         #root.visible { opacity: 1; }
+
+        /* Form styling */
+        .form-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #E5E1D8;
+            padding: 1rem 0;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        .form-input:focus {
+            border-bottom-color: var(--gold);
+        }
     </style>
 
     <script>
@@ -96,13 +111,19 @@
             Sparkles: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>,
             Utensils: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>,
             Menu: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>,
-            X: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            X: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>,
+            MapPin: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
+            Phone: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+            Instagram: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>,
+            Facebook: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>,
+            CheckCircle: () => <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-oma-gold"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         };
 
         const App = () => {
             const [scrolled, setScrolled] = useState(false);
             const [activeTab, setActiveTab] = useState('spa');
             const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [formStatus, setFormStatus] = useState('idle'); // idle, sending, success
 
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -110,15 +131,43 @@
                 
                 // Hide pre-loader once React has finished rendering
                 setTimeout(() => {
-                    document.getElementById('preloader').style.opacity = '0';
+                    const preloader = document.getElementById('preloader');
+                    if (preloader) preloader.style.opacity = '0';
                     document.getElementById('root').classList.add('visible');
                     setTimeout(() => {
-                        document.getElementById('preloader').style.display = 'none';
+                        if (preloader) preloader.style.display = 'none';
                     }, 800);
                 }, 1500);
 
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
+
+            const scrollToSection = (e, id) => {
+                e.preventDefault();
+                const element = document.getElementById(id);
+                if (element) {
+                    const offset = scrolled ? 80 : 100;
+                    const bodyRect = document.body.getBoundingClientRect().top;
+                    const elementRect = element.getBoundingClientRect().top;
+                    const elementPosition = elementRect - bodyRect;
+                    const offsetPosition = elementPosition - offset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+                setIsMenuOpen(false);
+            };
+
+            const handleFormSubmit = (e) => {
+                e.preventDefault();
+                setFormStatus('sending');
+                setTimeout(() => {
+                    setFormStatus('success');
+                    setTimeout(() => setFormStatus('idle'), 5000);
+                }, 1500);
+            };
 
             const serviceContent = {
                 spa: [
@@ -143,13 +192,23 @@
                 <div className="min-h-screen">
                     <nav className={`fixed w-full z-50 transition-all duration-700 ${scrolled ? 'bg-white/95 backdrop-blur-md py-3 shadow-md' : 'bg-transparent py-8'}`}>
                         <div className="container mx-auto px-6 flex justify-between items-center">
-                            <div className="flex flex-col leading-none">
+                            <div className="flex flex-col leading-none cursor-pointer" onClick={(e) => scrollToSection(e, 'home-section')}>
                                 <span className="text-2xl font-serif tracking-widest uppercase">Oma</span>
                                 <span className="text-[10px] tracking-[0.4em] uppercase opacity-70">The Spa</span>
                             </div>
                             <div className="hidden lg:flex items-center gap-10">
                                 {['Spa', 'Pilates', 'Dining', 'Contact'].map(item => (
-                                    <a key={item} href="#" className="text-[11px] uppercase tracking-widest hover:text-oma-gold transition-colors">{item}</a>
+                                    <a 
+                                        key={item} 
+                                        href={`#${item.toLowerCase()}`} 
+                                        onClick={(e) => {
+                                            if (item === 'Spa' || item === 'Dining') setActiveTab(item === 'Spa' ? 'spa' : 'dining');
+                                            scrollToSection(e, item === 'Contact' ? 'contact-section' : item === 'Pilates' ? 'pilates-feature' : 'experience-section');
+                                        }}
+                                        className="text-[11px] uppercase tracking-widest hover:text-oma-gold transition-colors"
+                                    >
+                                        {item}
+                                    </a>
                                 ))}
                                 <button className="bg-oma-charcoal text-white px-8 py-2.5 rounded-full text-[10px] uppercase tracking-widest hover:bg-oma-gold transition-all">Book Now</button>
                             </div>
@@ -157,19 +216,19 @@
                         </div>
                     </nav>
 
-                    <section className="relative h-screen flex items-center justify-center">
+                    <section id="home-section" className="relative h-screen flex items-center justify-center">
                         <div className="absolute inset-0">
                             <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=2000" className="w-full h-full object-cover brightness-[0.7]" alt="Hero" />
                             <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-oma-beige"></div>
                         </div>
                         <div className="relative z-10 text-center text-white px-6">
                             <h1 className="text-6xl md:text-9xl font-serif mb-6 leading-none">Holistic <br/><span className="italic font-light">Elegance</span></h1>
-                            <p className="max-w-md mx-auto opacity-80 text-sm tracking-wide mb-10">A sanctuary where movement meets stillness in the heart of Victoria Island.</p>
-                            <button className="bg-white text-oma-charcoal px-12 py-4 rounded-full text-[11px] uppercase tracking-[0.2em] hover:bg-oma-charcoal hover:text-white transition-all shadow-2xl">Explore Menu</button>
+                            <p className="max-w-md mx-auto opacity-80 text-sm tracking-wide mb-10 font-light">A sanctuary where movement meets stillness in the heart of Victoria Island.</p>
+                            <button onClick={(e) => scrollToSection(e, 'experience-section')} className="bg-white text-oma-charcoal px-12 py-4 rounded-full text-[11px] uppercase tracking-[0.2em] hover:bg-oma-charcoal hover:text-white transition-all shadow-2xl">Explore Menu</button>
                         </div>
                     </section>
 
-                    <section className="py-24 px-6 bg-oma-beige">
+                    <section id="experience-section" className="py-24 px-6 bg-oma-beige">
                         <div className="container mx-auto">
                             <div className="text-center mb-16">
                                 <h2 className="text-4xl md:text-6xl font-serif mb-8">The Experience</h2>
@@ -182,7 +241,7 @@
                                     ].map(cat => (
                                         <button key={cat.id} onClick={() => setActiveTab(cat.id)}
                                             className={`flex items-center gap-2 px-8 py-3 rounded-full text-[10px] uppercase tracking-widest transition-all ${
-                                                activeTab === cat.id ? 'bg-oma-charcoal text-white shadow-xl' : 'bg-white border border-oma-border'
+                                                activeTab === cat.id ? 'bg-oma-charcoal text-white shadow-xl' : 'bg-white border border-oma-border hover:border-oma-gold'
                                             }`}>
                                             {cat.icon} {cat.name}
                                         </button>
@@ -197,7 +256,7 @@
                                         </div>
                                         <div className="p-8">
                                             <span className="text-[10px] text-oma-gold font-bold uppercase tracking-widest">{s.dur}</span>
-                                            <h3 className="text-2xl font-serif mt-2 mb-4">{s.title}</h3>
+                                            <h3 className="text-2xl font-serif mt-2 mb-4 group-hover:text-oma-gold transition-colors">{s.title}</h3>
                                             <button className="text-[10px] uppercase tracking-widest font-bold border-b border-oma-border pb-1 hover:border-oma-gold transition-colors">Book Now</button>
                                         </div>
                                     </div>
@@ -206,16 +265,128 @@
                         </div>
                     </section>
 
-                    <footer className="py-12 bg-oma-beige text-center border-t border-oma-border">
-                        <span className="text-2xl font-serif tracking-widest uppercase">Oma</span>
-                        <p className="text-[9px] uppercase tracking-[0.4em] opacity-40 mt-4">14a Adeola Hopewell, Victoria Island, Lagos</p>
+                    {/* Pilates Feature Section */}
+                    <section id="pilates-feature" className="bg-oma-charcoal py-24 text-white">
+                        <div className="container mx-auto px-6">
+                            <div className="grid lg:grid-cols-2 gap-20 items-center">
+                                <div className="relative group">
+                                    <div className="aspect-[4/5] rounded-[60px] overflow-hidden">
+                                        <img 
+                                            src="https://images.unsplash.com/photo-1518611012118-29a8d63ee0c2?w=1200" 
+                                            alt="Pilates Studio" 
+                                            className="w-full h-full object-cover transform transition-transform duration-[2000ms] group-hover:scale-105"
+                                        />
+                                    </div>
+                                    <div className="absolute -bottom-10 -right-10 bg-oma-gold p-10 rounded-[40px] hidden md:block max-w-xs shadow-2xl">
+                                        <div className="text-white"><Icons.Dumbbell /></div>
+                                        <h4 className="text-xl font-serif mb-2 mt-4">Reformer Studio</h4>
+                                        <p className="text-sm text-white/80 font-light tracking-wide">
+                                            Building strong cores and lengthening silhouettes through precise resistance training.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="space-y-8">
+                                    <span className="text-[11px] uppercase tracking-[0.4em] text-oma-gold font-bold">Elevated Living</span>
+                                    <h2 className="text-4xl md:text-6xl font-serif leading-tight">Beyond the <br/>Massage Table</h2>
+                                    <p className="text-white/60 text-lg font-light leading-relaxed">
+                                        At Oma, we provide a 360-degree approach to wellness. Start with a sunrise Reformer session, retreat into our award-winning spa for a deep tissue restoration, and finish your afternoon at <strong>Amelia's</strong>.
+                                    </p>
+                                    <button onClick={(e) => scrollToSection(e, 'contact-section')} className="bg-oma-gold text-white px-10 py-4 rounded-full text-[11px] uppercase tracking-[0.2em] hover:bg-white hover:text-oma-charcoal transition-all">
+                                        Inquire About Membership
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Contact & Inquiry Section */}
+                    <section id="contact-section" className="py-24 px-6 bg-white">
+                        <div className="container mx-auto">
+                            <div className="grid lg:grid-cols-3 gap-12">
+                                <div className="lg:col-span-1">
+                                    <h2 className="text-4xl md:text-5xl font-serif mb-8">Visit Us</h2>
+                                    <div className="space-y-10">
+                                        <div className="flex gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-oma-beige flex items-center justify-center shrink-0">
+                                                <div className="text-oma-gold"><Icons.MapPin /></div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-[10px] uppercase tracking-widest font-bold text-oma-gold mb-1">Address</h4>
+                                                <p className="text-oma-charcoal font-light">14a Adeola Hopewell, Victoria Island, Lagos</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-oma-beige flex items-center justify-center shrink-0">
+                                                <div className="text-oma-gold"><Icons.Phone /></div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-[10px] uppercase tracking-widest font-bold text-oma-gold mb-1">Booking</h4>
+                                                <p className="text-oma-charcoal font-light">+234 907 830 4040</p>
+                                                <p className="text-oma-charcoal/50 text-xs mt-1 italic">WhatsApp available</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="lg:col-span-2">
+                                    <div className="bg-oma-beige rounded-[40px] p-8 md:p-12 h-full flex flex-col justify-center">
+                                        {formStatus === 'success' ? (
+                                            <div className="text-center py-12 flex flex-col items-center">
+                                                <Icons.CheckCircle />
+                                                <h3 className="text-3xl font-serif mt-6 mb-2">Message Received</h3>
+                                                <p className="text-oma-charcoal/60 font-light">Thank you for reaching out. We will contact you shortly.</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <h3 className="text-2xl font-serif mb-8">Membership Inquiries</h3>
+                                                <form onSubmit={handleFormSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                    <input required type="text" placeholder="Full Name" className="form-input font-light" />
+                                                    <input required type="email" placeholder="Email Address" className="form-input font-light" />
+                                                    <div className="md:col-span-2">
+                                                        <textarea required placeholder="Your Message" rows="3" className="form-input font-light resize-none"></textarea>
+                                                    </div>
+                                                    <button 
+                                                        disabled={formStatus === 'sending'}
+                                                        className="bg-oma-charcoal text-white py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-oma-gold transition-all md:col-span-2 disabled:opacity-50"
+                                                    >
+                                                        {formStatus === 'sending' ? 'Sending...' : 'Send Inquiry'}
+                                                    </button>
+                                                </form>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <footer className="py-20 bg-oma-beige text-center border-t border-oma-border">
+                        <div className="flex flex-col items-center mb-10">
+                            <span className="text-3xl font-serif tracking-widest uppercase mb-2">Oma</span>
+                            <span className="text-[10px] tracking-[0.5em] uppercase opacity-50">The Spa</span>
+                        </div>
+                        <div className="flex justify-center gap-8 mb-12">
+                            <a href="#" className="w-10 h-10 border border-oma-border rounded-full flex items-center justify-center hover:bg-oma-gold hover:border-oma-gold hover:text-white transition-all"><Icons.Instagram /></a>
+                            <a href="#" className="w-10 h-10 border border-oma-border rounded-full flex items-center justify-center hover:bg-oma-gold hover:border-oma-gold hover:text-white transition-all"><Icons.Facebook /></a>
+                        </div>
+                        <p className="text-[9px] uppercase tracking-[0.4em] opacity-40">© 2024 Oma The Spa. Lagos, Nigeria.</p>
                     </footer>
 
                     {isMenuOpen && (
-                        <div className="fixed inset-0 z-[100] bg-oma-beige flex flex-col items-center justify-center space-y-8">
+                        <div className="fixed inset-0 z-[100] bg-oma-beige flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-300">
                             <button className="absolute top-8 right-6" onClick={() => setIsMenuOpen(false)}><Icons.X /></button>
                             {['Spa', 'Pilates', 'Dining', 'Contact'].map(item => (
-                                <a key={item} href="#" className="text-5xl font-serif hover:text-oma-gold transition-colors">{item}</a>
+                                <a 
+                                    key={item} 
+                                    href={`#${item.toLowerCase()}`} 
+                                    onClick={(e) => {
+                                        if (item === 'Spa' || item === 'Dining') setActiveTab(item === 'Spa' ? 'spa' : 'dining');
+                                        scrollToSection(e, item === 'Contact' ? 'contact-section' : item === 'Pilates' ? 'pilates-feature' : 'experience-section');
+                                    }}
+                                    className="text-5xl font-serif hover:text-oma-gold transition-colors"
+                                >
+                                    {item}
+                                </a>
                             ))}
                         </div>
                     )}
